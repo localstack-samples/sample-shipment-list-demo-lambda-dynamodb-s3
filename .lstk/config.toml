@@ -6,6 +6,7 @@
 type = "aws"
 image = "localstack/localstack-pro"
 tag = "latest"
+port = "4566"
 env = ["ci"]
 
 [env.ci]
