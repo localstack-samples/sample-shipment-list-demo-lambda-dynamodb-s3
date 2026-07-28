@@ -87,7 +87,7 @@ class ShipmentServiceIntegrationTest extends LocalStackSetupConfigurations {
 
     assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     var execResult = executeInContainer(
-      "awslocal s3api list-objects --bucket shipment-picture-bucket --query length(Contents[])");
+      "aws --endpoint-url=http://localhost:4566 s3api list-objects --bucket shipment-picture-bucket --query length(Contents[])");
     assertEquals(String.valueOf(1), execResult.getStdout().trim());
   }
 

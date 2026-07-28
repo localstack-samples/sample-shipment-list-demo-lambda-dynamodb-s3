@@ -57,6 +57,8 @@ src/main/shipment-list-frontend/npm-debug.log*
 src/main/shipment-list-frontend/yarn-debug.log*
 src/main/shipment-list-frontend/yarn-error.log*
 
+src/main/resources/buckets.properties
+
 # terraform
 terraform/.terraform/
 terraform/terraform.tfstate

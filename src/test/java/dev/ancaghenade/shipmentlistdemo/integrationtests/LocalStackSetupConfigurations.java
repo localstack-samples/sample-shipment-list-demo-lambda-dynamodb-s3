@@ -18,6 +18,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.Container.ExecResult;
+import org.testcontainers.containers.ExecConfig;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.containers.localstack.LocalStackContainer.Service;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
@@ -67,6 +68,17 @@ import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
 public class LocalStackSetupConfigurations {
   private static final String LOCALSTACK_AUTH_TOKEN = System.getenv().getOrDefault(
     "LOCALSTACK_AUTH_TOKEN", "");
+
+  static {
+    if (LOCALSTACK_AUTH_TOKEN.isBlank()) {
+      // fail fast here: without this, the container starts, LocalStack exits immediately for
+      // lack of a license, and Testcontainers still waits out its ~60s readiness timeout before
+      // surfacing that failure, which just looks like a hang.
+      throw new IllegalStateException(
+        "LOCALSTACK_AUTH_TOKEN is not set. Find your token at "
+          + "https://app.localstack.cloud/workspace/auth-token");
+    }
+  }
 
   @Container
   protected static LocalStackContainer localStack =
@@ -239,12 +251,12 @@ public class LocalStackSetupConfigurations {
       // lambda needs to be in state "Active" in order to proceed with adding permissions
       // this can take 2-3 seconds to reach
       var result = localStack.execInContainer(formatCommand(
-        "awslocal lambda get-function --function-name shipment-picture-lambda-validator"));
+        "aws --endpoint-url=http://localhost:4566 lambda get-function --function-name shipment-picture-lambda-validator"));
       var obj = new JSONObject(result.getStdout()).getJSONObject("Configuration");
       var state = obj.getString("State");
       while (!state.equals("Active")) {
         result = localStack.execInContainer(formatCommand(
-          "awslocal lambda get-function --function-name shipment-picture-lambda-validator"));
+          "aws --endpoint-url=http://localhost:4566 lambda get-function --function-name shipment-picture-lambda-validator"));
         obj = new JSONObject(result.getStdout()).getJSONObject("Configuration");
         state = obj.getString("State");
       }
@@ -440,7 +452,17 @@ public class LocalStackSetupConfigurations {
     return execResult;
   }
 
-  private static String[] formatCommand(String command) {
-    return command.split(" ");
+  // lstk can't run here (it's a host-side proxy with no in-container docker/config access);
+  // the image already bundles the plain aws CLI, so we point it at the gateway directly instead.
+  private static final Map<String, String> AWS_CLI_ENV = Map.of(
+    "AWS_ACCESS_KEY_ID", "test",
+    "AWS_SECRET_ACCESS_KEY", "test",
+    "AWS_DEFAULT_REGION", "us-east-1");
+
+  private static ExecConfig formatCommand(String command) {
+    return ExecConfig.builder()
+      .command(command.split(" "))
+      .envVars(AWS_CLI_ENV)
+      .build();
   }
 }
