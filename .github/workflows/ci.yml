@@ -27,11 +27,6 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
       - name: Set up JDK
         uses: actions/setup-java@v2
         with:
@@ -41,22 +36,17 @@ jobs:
       - name: Set up Maven
         run: sudo apt-get install -y maven
 
+      - name: Install lstk
+        run: npm install -g @localstack/lstk
+
       - name: Start LocalStack
-        uses: LocalStack/setup-localstack@v0.2.4
-        with:
-          image-tag: 'latest'
-          use-pro: 'true'
-          configuration: LS_LOG=trace
-          install-awslocal: 'true'
         env:
           LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+        run: |
+          lstk start
 
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v3
-
-      - name: Install tflocal
-        run: |
-          pip install --upgrade terraform-local
 
       - name: Build project
         run: |
@@ -66,9 +56,9 @@ jobs:
       - name: Deploy using Terraform
         run: |
           cd terraform
-          tflocal init
-          tflocal plan
-          tflocal apply --auto-approve
+          lstk tf init
+          lstk tf plan
+          lstk tf apply --auto-approve
 
       - name: Build frontend
         run: |
@@ -79,11 +69,11 @@ jobs:
       - name: Show LocalStack logs
         if: always()
         run: |
-          localstack logs
+          lstk logs
 
       - name: Stop LocalStack
         run: |
-          localstack stop
+          lstk stop
 
       - name: Run Testcontainers tests
         env:

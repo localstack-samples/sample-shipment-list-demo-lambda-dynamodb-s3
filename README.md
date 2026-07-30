@@ -29,9 +29,9 @@ The following diagram shows the architecture that this sample application builds
 ## Prerequisites
 
 - A valid [LocalStack for AWS license](https://localstack.cloud/pricing). Your license provides a [`LOCALSTACK_AUTH_TOKEN`](https://docs.localstack.cloud/getting-started/auth-token/) to activate LocalStack.
-- [`localstack` CLI](https://docs.localstack.cloud/getting-started/installation/#localstack-cli).
-- [AWS CLI](https://docs.localstack.cloud/user-guide/integrations/aws-cli/) with the [`awslocal` wrapper](https://docs.localstack.cloud/user-guide/integrations/aws-cli/#localstack-aws-cli-awslocal).
-- [Terraform](https://docs.localstack.cloud/user-guide/integrations/terraform/) with the [`tflocal`](https://github.com/localstack/terraform-local) wrapper.
+- [`lstk` CLI](https://docs.localstack.cloud/aws/tooling/lstk/).
+- [AWS CLI](https://docs.localstack.cloud/user-guide/integrations/aws-cli/) with the [`lstk aws` proxy](https://docs.localstack.cloud/aws/tooling/lstk/).
+- [Terraform](https://docs.localstack.cloud/user-guide/integrations/terraform/) with the [`lstk tf` proxy](https://docs.localstack.cloud/aws/tooling/lstk/).
 - [Maven 3.8.5+](https://maven.apache.org/install.html) & [Java 17](https://www.java.com/en/download/help/download_options.html)
 - [Node.js](https://nodejs.org/en/download/) & [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
 - [`make`](https://www.gnu.org/software/make/) (**optional**, but recommended for running the sample application)
@@ -64,11 +64,10 @@ This will:
 
 ## Deployment
 
-Start LocalStack with the `LOCALSTACK_AUTH_TOKEN` pre-configured:
+Start LocalStack:
 
 ```shell
-localstack auth set-token <your-auth-token>
-localstack start
+lstk start
 ```
 
 To deploy the sample application, run the following command:
@@ -138,7 +137,7 @@ Available actions:
 
 This sample demonstrates Infrastructure as Code (IaC) testing by using identical Terraform configurations for both AWS and LocalStack environments. The application leverages Spring profiles to seamlessly switch between production and development configurations without code changes.
 
-The Terraform configuration defines all necessary AWS resources and their relationships, while `tflocal` automatically reconfigures endpoints for LocalStack. This approach enables:
+The Terraform configuration defines all necessary AWS resources and their relationships, while `lstk tf` automatically reconfigures endpoints for LocalStack. This approach enables:
 
 - Validation of infrastructure changes before AWS deployment
 - Consistent development environments across teams
@@ -167,7 +166,7 @@ This sample application demonstrates how to build, test, and deploy a full-stack
 - Using Spring Boot profiles to seamlessly switch between LocalStack and AWS environments.
 - Implementing real-time updates using Server-Sent Events and SQS message consumption.
 - Leveraging Testcontainers for integration testing against LocalStack infrastructure.
-- Utilizing `tflocal` and `awslocal` to streamline local development workflows.
+- Utilizing `lstk tf` and `lstk aws` to streamline local development workflows.
 
 ## Learn More
 

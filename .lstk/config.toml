@@ -1,0 +1,13 @@
+# lstk auto-discovers ./.lstk/config.toml (relative to cwd) before falling back to the
+# per-user config, so `lstk start` in .github/workflows/ci.yml picks this up with no extra flag.
+# Run 'lstk config path' to see where your personal (non-CI) config lives instead.
+
+[[containers]]
+type = "aws"
+image = "localstack/localstack-pro"
+tag = "latest"
+port = "4566"
+env = ["ci"]
+
+[env.ci]
+LS_LOG = "trace"
